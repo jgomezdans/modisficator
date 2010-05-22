@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+from nose.tools import *
+from modisficator.modis_db import *
+
+def test_create_class():
+    m = modis_db()
+
+def test_connect_to_db ():
+    m = modis_db()
+    m.create_db()
