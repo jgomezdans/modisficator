@@ -16,10 +16,10 @@ class modis_db:
         c = self.db_conn.cursor()
         
         sql_code = '''CREATE TABLE modis_data
-                (id INTEGER PRIMARY KEY, platform TEXT,
+                (platform TEXT,
                 product TEXT, tile TEXT, date TEXT,
                 data_file TEXT, browse_file TEXT,
-                metadata_file TEXT )'''
+                metadata_file TEXT,PRIMARY KEY (product, tile, date ))'''
         c.execute ( sql_code )
         self.db_conn.commit()
         c.close()
@@ -28,7 +28,7 @@ class modis_db:
                 data_file, browse_file, metadata_file ):
 
         c = self.db_conn.cursor()
-        sql_code = """INSERT INTO modis_data values (NULL, '%s','%s','%s', \
+        sql_code = """INSERT INTO modis_data values ( '%s','%s','%s', \
                      '%s','%s','%s','%s')""" % ( platform, product, \
                             tile, date,  data_file, \
                             browse_file, metadata_file )
@@ -43,26 +43,27 @@ class modis_db:
         sql_code = """SELECT * FROM modis_data """
         iand = False
         if product != None:
-            sql_code + "WHERE product='%s' " % product
+            sql_code += "WHERE product='%s' " % product
             iand = True
         if tile != None:
             if iand:
-                sql_code + "AND tile='%s' " % tile
+                sql_code += "AND tile='%s' " % tile
             else:
-                sql_code = "WHERE tile='%s' "% tile
+                sql_code += "WHERE tile='%s' "% tile
                 iand = True
         if date_start != None:
             if iand:
-                sql_code + "AND date>=='%s' " % date_start
+                sql_code += "AND date>=='%s' " % date_start
             else:
-                sql_code = "WHERE date>='%s' "% date_start
+                sql_code =+ "WHERE date>='%s' "% date_start
                 iand = True
         if date_end != None:
             if iand:
-                sql_code + "AND date<='%s' " % date_end
+                sql_code =+ "AND date<='%s' " % date_end
             else:
-                sql_code = "WHERE date<='%s' "% date_end
+                sql_code =+ "WHERE date<='%s' "% date_end
                 iand = True
+        print sql_code
         c.execute (sql_code )
         result = c.fetchall()
         return result
