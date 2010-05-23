@@ -82,8 +82,6 @@ class downloader:
             get_dates = list ( dates[istart] )
         out_dir = os.path.join ( self.output_dir, platform, product_name, \
                                 self.tile )
-        print out_dir
-        pdb.set_trace()
         if not os.path.exists ( out_dir ):
             os.makedirs ( out_dir )
         output_files = []
@@ -96,20 +94,18 @@ class downloader:
                 fname = grab_file.split()[7]
                 f_out = open( os.path.join ( out_dir, fname), 'w')
                 output_files.append ( os.path.join ( out_dir, fname) )
-                print os.path.join ( out_dir, fname)
-                pdb.set_trace()
+
                 # Download the file a chunk at a time
                 # Each chunk is sent to handleDownload
                 # RETR is an FTP command
-                print 'Getting ' + fname
+
                 #
                 def handle_download(block):
                     f_out.write(block)
                     f_out.flush()
-                    print ".",
-                    sys.stdout.flush()
+
                 self.ftp.retrbinary('RETR ' + fname, handle_download )
-                print 
+
                 f_out.close()
 
         return output_files
