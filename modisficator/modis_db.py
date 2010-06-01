@@ -38,7 +38,7 @@ class modis_db:
         c.close()
 
     def find_data ( self, product=None, tile=None, \
-                          date_start=None, date_end=None ):
+                          date_start=None, date_end=None, timestamp=None ):
         c = self.db_conn.cursor()
         sql_code = """SELECT * FROM modis_data """
         iand = False
@@ -51,19 +51,31 @@ class modis_db:
             else:
                 sql_code += "WHERE tile='%s' "% tile
                 iand = True
-        if date_start != None:
-            if iand:
-                sql_code += "AND date>=='%s' " % date_start
+        if timestamp == None:
+            if date_start != None:
+                if iand:
+                    sql_code += "AND date>=='%s' " % date_start
+                else:
+                    sql_code += "WHERE date>='%s' "% date_start
+                    iand = True
+            if date_end != None:
+                if iand:
+                    sql_code += "AND date<='%s' " % date_end
+                else:
+                    sql_code += "WHERE date<='%s' "% date_end
+                    iand = True
+        else:
+            if (date_start != None) or (date_end != None):
+                raise ValueError, "Either a timestamp or a period are admissible"
             else:
-                sql_code =+ "WHERE date>='%s' "% date_start
-                iand = True
-        if date_end != None:
-            if iand:
-                sql_code =+ "AND date<='%s' " % date_end
-            else:
-                sql_code =+ "WHERE date<='%s' "% date_end
-                iand = True
+                if iand:
+                    sql_code += "AND date='%s' " % timestamp
+                else:
+                    sql_code += "WHERE date='%s' "% timestamp
+                    iand = True
+
         print sql_code
         c.execute (sql_code )
         result = c.fetchall()
         return result
+
