@@ -103,9 +103,10 @@ class downloader:
                 print iend
             except:
                 raise ValueError, "Wrong end date!"
-            get_dates = dates[istart:iend]
+            get_dates = dates[istart:(iend+1)]
         else:
             get_dates = list ( dates[istart] )
+        print get_dates, parsed_start_date, parsed_end_date
         return ( ftp_dir, get_dates )
 
     def get_product ( self, product_name, start_date, platform, \
@@ -127,6 +128,7 @@ class downloader:
         if not os.path.exists ( out_dir ):
             os.makedirs ( out_dir )
         output_files = []
+        
         for fecha in get_dates:
             # For each date, cd into that dir, and grab all files.
             try:

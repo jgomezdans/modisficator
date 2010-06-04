@@ -84,16 +84,24 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
         return_dict[ layer ] = datas
     return_dict[ 'dates' ] = dates
     return return_dict
-    
+
+
+def main ( tile, start_date, end_date ):
+    from modisficator import get_modis_product
+    for retval in get_modis_product( tile, "MOD14A1", start_date, "TERRA", end_date=end_date):
+        print retval
+
+        
 if __name__ == "__main__":
-    import pylab, numpy, time
-    #queimas = get_active_fires ( \
-        #"./test/MOD14A1.A2003137.h09v07.005.2007319180038.hdf" )
-    dates = []
-    queimas = numpy.loadtxt ( "./test/MOD14A1.A2003137.h09v07.005.2007319180038_LonLat.txt", \
-        delimiter=";", usecols=(1,2,3), converters={1: dates.append})[:, 1:]
-    ( lon, lat ) = queimas[200]
-    date = dates[200].lstrip().rstrip()
-    print "Starting slurrrping", time.asctime()
-    datos = get_nbar_rho ( lon, lat, date, t_window = 42 )
-    print "Finished slurrrping", time.asctime()
+    #import pylab, numpy, time
+    ##queimas = get_active_fires ( \
+        ##"./test/MOD14A1.A2003137.h09v07.005.2007319180038.hdf" )
+    #dates = []
+    #queimas = numpy.loadtxt ( "./test/MOD14A1.A2003137.h09v07.005.2007319180038_LonLat.txt", \
+        #delimiter=";", usecols=(1,2,3), converters={1: dates.append})[:, 1:]
+    #( lon, lat ) = queimas[200]
+    #date = dates[200].lstrip().rstrip()
+    #print "Starting slurrrping", time.asctime()
+    #datos = get_nbar_rho ( lon, lat, date, t_window = 42 )
+    #print "Finished slurrrping", time.asctime()
+    main( "h09v07", "2003.05.01", "2003.06.01" )
