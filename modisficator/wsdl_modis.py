@@ -14,6 +14,8 @@ def wsdl_get_data_tseries ( lon, lat, product, layer, \
     from suds.client import Client
     import numpy
     import datetime
+    import pylab
+    import time
 
     WSDLFile = 'http://daac.ornl.gov/cgi-bin/MODIS/" + \
                 "GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl?WSDL'
@@ -77,7 +79,6 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
     """
     from suds.client import Client
     import numpy
-    import time
 
     if date_format == "MODIS":
         def parse_date ( tempo ):
