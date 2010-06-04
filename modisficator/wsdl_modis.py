@@ -77,6 +77,7 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
     """
     from suds.client import Client
     import numpy
+    import time
 
     if date_format == "MODIS":
         def parse_date ( tempo ):
