@@ -104,4 +104,4 @@ if __name__ == "__main__":
     #print "Starting slurrrping", time.asctime()
     #datos = get_nbar_rho ( lon, lat, date, t_window = 42 )
     #print "Finished slurrrping", time.asctime()
-    main( "h09v07", "2003.05.01", "2003.06.01" )
+    main( "h19v10", "2004.08.01", "2004.10.01" )

@@ -8,11 +8,20 @@ import pdb
 import sys
 """The downloader code downloads MODIS datasets from NASA's website.
 """
-class invalid_platform(Exception):
-    print "The platform you selected is not TERRA, AQUA or COMBINED"
+class InvalidPlatform(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr (self.value)
+            
 
-class invalid_product(Exception):
-    print "The product you selected does not appear to exist."
+
+class InvalidProduct(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr (self.value)
+
 
 
 class downloader:
@@ -28,21 +37,27 @@ class downloader:
         self.ftp_host = "e4ftl01u.ecs.nasa.gov"
         self.ftp = ftplib.FTP ( self.ftp_host )
         #self.ftp.set_debuglevel(2)
-        self.ftp.set_pasv( True )
+        #self.ftp.set_pasv( True )
         self.ftp.login()
         self.collection = collection
         self.tile = tile
         self.output_dir = output_dir
         
+    def __del__ ( self ):
+        #close FtP connection and be nice.
+        self.ftp.close()
+            
     def get_list ( self, product_name, start_date, platform, end_date=None ):
         self.platform = platform
         self.product = product_name
-        try:
-            (ftp_dir, get_dates ) = self.__navigate_ftp ( \
+
+        #try:
+        (ftp_dir, get_dates ) = self.__navigate_ftp ( \
                             product_name, start_date, platform, \
                             end_date=end_date )
-        except:
-            raise ValueError, "Some error occurred in __navigate_ftp!"
+        #except:
+            
+        #    raise ValueError, "Some error occurred in __navigate_ftp!"
         return ( ftp_dir, get_dates )
         
     def __navigate_ftp ( self, product_name, start_date, platform, \
@@ -88,21 +103,32 @@ class downloader:
         # Dates are here now.
         # Discard dates prior to start_date parameter...
         Dates = [ time.strptime(d, "%Y.%m.%d") for d in dates ]
-        try:
-            istart = [ i for i in xrange(len(Dates)) \
-                    if Dates[i] == parsed_start_date ][0]
-        except:
-            raise ValueError, "Wrong start date!"
+
+        dstart = -399.
+        for i in xrange(len(Dates)):
+            if Dates[i][0] == parsed_start_date[0]: # Same year!
+                d = Dates[i][7] - parsed_start_date[7] # DoY difference
+                if d < 0 and d > dstart:
+                    dstart = d
+                    istart = i
+                elif d == 0:
+                    istart = i
+                    break
+        
             
         # Do the same if we have an end date
+        
         if end_date != None:
-            try:
-                iend = [ i for i in xrange(len(Dates)) \
-                    if (Dates[i]>=parsed_start_date)\
-                        and ( Dates[i]<=parsed_end_date) ][-1]
-                print iend
-            except:
-                raise ValueError, "Wrong end date!"
+            dstart = 300.
+            for i in xrange(len(Dates)):
+                if Dates[i][0] == parsed_end_date[0]:
+                    d = Dates[i][7] - parsed_end_date[7]
+                    if d > 0 and d < dstart:
+                        dstart = d
+                        iend = i
+                    elif d == 0:
+                        iend = i
+                        break
             get_dates = dates[istart:(iend+1)]
         else:
             get_dates = list ( dates[istart] )

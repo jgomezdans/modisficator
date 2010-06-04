@@ -1,18 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+The MODIS products database. This code manages (creation and search)
+a sqlite database that stores MODIS products that have been downloaded,
+ with the path where the data are stored. Simple queries (by tile, dates,
+ product type) are available.
+"""
 import sqlite3
 
 class modis_db:
+    """
+    The modis_db class stores the MODIS products and is able to search
+    them.
+    """
     def __init__ ( self, db_location="/home/ucfajlg/python/" + \
                                      "modisficator/modis_db.sqlite" ):
+        """
+        The creator. Usually requires a loction for the db, which could
+        be made unique per user (eg ~/Data/modis_db.sqlte or something)
+
+        :parameter db_location: The location of the sqlite database
+        """
         self.db_file = db_location
         self.connect_to_db ()
-        print self.db_file
+        
 
     def connect_to_db ( self ):
+        """
+        A method to connect to the database. Should test for exceptions?
+        """
         self.db_conn = sqlite3.connect( self.db_file )
 
     def create_db ( self ):
+        """
+        If the database doesn't exist, create it.
+        """
         c = self.db_conn.cursor()
         
         sql_code = '''CREATE TABLE modis_data
@@ -26,19 +48,43 @@ class modis_db:
 
     def insert_record ( self, platform, product, tile, date, \
                 data_file, browse_file, metadata_file ):
+        """
+        Insert records into database. If they are already there, we
+        should fire an exception, so TODO!
 
+        :parameter platform: AQUA, TERRA or COMBINED
+        :parameter product: The product name, such as MOD09GA
+        :parameter tile: The tile, such as h17v04.
+        :parameter date: The MODIS product timestamp, in YYYY-MM-DD format
+        :parameter data_file: Full path to HDF datafile
+        :parameter browse_file: Full path to JPG brose image.
+        :parameter metadata_file: Full path to XML metadata file.
+        """
         c = self.db_conn.cursor()
         sql_code = """INSERT INTO modis_data values ( '%s','%s','%s', \
                      '%s','%s','%s','%s')""" % ( platform, product, \
                             tile, date,  data_file, \
                             browse_file, metadata_file )
         c.execute ( sql_code )
-        print sql_code
+        
         self.db_conn.commit()
         c.close()
 
     def find_data ( self, product=None, tile=None, \
                           date_start=None, date_end=None, timestamp=None ):
+        """
+        Finding granules. Search the database for granules, builds an
+        SQL query and returns the rows or an empty list if none are found.
+        The temporal query allows searching for granules before a time,
+        after a time, for a period, or for a given date only (timestamp
+        option).
+
+        :parameter product: Product name
+        :parameter tile: tile
+        :parameter date_start: Starting date (inclusive)
+        :parameter date_end: Ending date (inclusive)
+        :parameter timestamp: Fish one particular date ONLY
+        """
         c = self.db_conn.cursor()
         sql_code = """SELECT * FROM modis_data """
         iand = False
@@ -74,7 +120,7 @@ class modis_db:
                     sql_code += "WHERE date='%s' "% timestamp
                     iand = True
 
-        print sql_code
+        
         c.execute (sql_code )
         result = c.fetchall()
         return result
