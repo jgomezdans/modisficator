@@ -36,18 +36,19 @@ def get_active_fires ( fname, fire_thresh=8 ):
                     datetime.timedelta(days = day)).strftime("%Y.%m.%d")
         ( y, x ) = numpy.nonzero ( fires[day, :, :] >= fire_thresh )
         num_fires = x.shape[0]
-        sample_xy = [ gdal.ApplyGeoTransform ( geo_transform, \
-                float( x[i] ), \
-                float( y[i] ) ) \
-                for i in xrange(x.shape[0]) ]
-        sample_xy = numpy.array ( sample_xy )
-        lonlat = transform.TransformPoints  ( sample_xy )
-        lonlat = numpy.array(lonlat)[ :, :2 ]
-        txt_out = ''.join ( ["%s ; %s ; %f ; %f\n"%( current_date_pretty, \
-                  current_date, lonlat[i, 0], lonlat[i, 1]) \
-                  for i in xrange( num_fires ) ] )
-        return_struct [ current_date ] = lonlat
-        fout.write ( txt_out )
+        if num_fires > 0:
+            sample_xy = [ gdal.ApplyGeoTransform ( geo_transform, \
+                    float( x[i] ), \
+                    float( y[i] ) ) \
+                    for i in xrange(x.shape[0]) ]
+            sample_xy = numpy.array ( sample_xy )
+            lonlat = transform.TransformPoints  ( sample_xy )
+            lonlat = numpy.array(lonlat)[ :, :2 ]
+            txt_out = ''.join ( ["%s ; %s ; %f ; %f\n"%( current_date_pretty, \
+                    current_date, lonlat[i, 0], lonlat[i, 1]) \
+                    for i in xrange( num_fires ) ] )
+            return_struct [ current_date ] = lonlat
+            fout.write ( txt_out )
     fout.close()
     return return_struct
 
@@ -63,8 +64,8 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
     return_dict = {}
     day_start = doy - t_window
     day_end = doy + t_window
-    x_pixels = 0
-    y_pixels = 0
+    x_pixels = .5
+    y_pixels = .5
     # First, get QA from MCD43A2 product
     product = "MCD43A2"
     for layer in ["BRDF_Albedo_Quality", "BRDF_Albedo_Band_Quality" ] :
@@ -95,21 +96,13 @@ def main ( tile, start_date, end_date ):
         hdf_file = (retval[1]).encode( 'ascii' )
         
         afires = get_active_fires ( hdf_file )
-        pdb.set_trace()
-        get_nbar_rho ( afires['A2004210'][20][0], \
-                    afires['A2004210'][20][1],  'A2004210' )
+        for dates in afires.iterkeys():
+            for detection in afires[dates][100:]:
+                D = get_nbar_rho ( detection[0], \
+                        detection[1],  dates )
+                pdb.set_trace()
+                print D
 
         
 if __name__ == "__main__":
-    #import pylab, numpy, time
-    ##queimas = get_active_fires ( \
-        ##"./test/MOD14A1.A2003137.h09v07.005.2007319180038.hdf" )
-    #dates = []
-    #queimas = numpy.loadtxt ( "./test/MOD14A1.A2003137.h09v07.005.2007319180038_LonLat.txt", \
-        #delimiter=";", usecols=(1,2,3), converters={1: dates.append})[:, 1:]
-    #( lon, lat ) = queimas[200]
-    #date = dates[200].lstrip().rstrip()
-    #print "Starting slurrrping", time.asctime()
-    #datos = get_nbar_rho ( lon, lat, date, t_window = 42 )
-    #print "Finished slurrrping", time.asctime()
-    main( "h19v10", "2004.08.01", "2004.10.01" )
+    main( "h19v10", "2004.08.01", "2004.08.25" )

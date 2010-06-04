@@ -133,9 +133,9 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
     except:
         raise ValueError, "Something wrong with your request. Time window?"
 
-    for time_step in xrange(len(ret.subset.item)):
+    for time_step in xrange(len(ret.subset)):
         # Process time to get pylab-friendly time axis.
-        tempo = ret.subset.item[time_step].strip().split(",")[2]
+        tempo = ret.subset[time_step].strip().split(",")[2]
         tempo_out.append ( tempo )
 
         date.append( parse_date ( tempo ) )
@@ -143,18 +143,18 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
         if ret.scale == 0.:
             try:
                 vals = numpy.array ( [int(f) for f in \
-                    ret.subset.item[time_step].strip().split(",")[5:]])
+                    ret.subset[time_step].strip().split(",")[5:]])
             except ValueError:
-                response = ret.subset.item[time_step].split("\n")[0] 
+                response = ret.subset[time_step].split("\n")[0]
                 vals = numpy.array ( [int(f) for f in \
                     response.strip().split(",")[5:]])
             value.append ( vals)
         else:
             try:
                 vals = numpy.array ( [float(f) for f in \
-                        ret.subset.item[time_step].strip().split(",")[5:]])
+                        ret.subset[time_step].strip().split(",")[5:]])
             except ValueError:
-                response = ret.subset.item[time_step].split("\n")[0] 
+                response = ret.subset[time_step].split("\n")[0]
                 vals = numpy.array ( [int(f) for f in \
                         response.strip().split(",")[5:]])
             value.append( vals*ret.scale)
