@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""The downloader code downloads MODIS datasets from NASA's website.
+"""
 
 import ftplib
 import time
 import os
-import pdb
-import sys
-"""The downloader code downloads MODIS datasets from NASA's website.
-"""
+
 class InvalidPlatform(Exception):
     def __init__(self, value):
         self.value = value
@@ -48,6 +47,9 @@ class downloader:
         self.ftp.close()
             
     def get_list ( self, product_name, start_date, platform, end_date=None ):
+        """
+        Getting a listing of the available products.
+        """
         self.platform = platform
         self.product = product_name
 
@@ -62,7 +64,6 @@ class downloader:
         
     def __navigate_ftp ( self, product_name, start_date, platform, \
                         end_date=None ):
-
         """
         This is the method traverses NASA's FTP directory, selecting what
         files to download, in terms of tile, start and end date.
@@ -78,18 +79,18 @@ class downloader:
                         "COMBINED":"/MOTA/"}
 
         if not platform_dir.has_key(platform):
-            raise invalid_platform, "Your platform was %s"%platform
+            raise InvalidPlatform, "Your platform was %s" % platform
         # Parse the start date to match FTP dir structure
         parsed_start_date = time.strptime(start_date, "%Y.%m.%d" )
         if end_date != None:
             parsed_end_date = time.strptime( end_date, "%Y.%m.%d" )
         # Change dir to product directory
         try:
-            self.ftp.cwd ("/%s/%s.%s/"%( platform_dir[platform], \
+            self.ftp.cwd ("/%s/%s.%s/" % ( platform_dir[platform], \
                             product_name, self.collection ))
         except ftplib.error_perm:
-            raise invalid_product, "This product doesn't seem to exist?"
-        ftp_dir = "/%s/%s.%s/"%( platform_dir[platform], \
+            raise InvalidProduct, "This product doesn't seem to exist?"
+        ftp_dir = "/%s/%s.%s/" % ( platform_dir[platform], \
                                 product_name, self.collection )
         # Now, get all the available dates (they are subdirs, so need
         # to parse return string).
@@ -160,7 +161,7 @@ class downloader:
             try:
                 self.ftp.cwd ( "%s/%s"%(ftp_dir, fecha) )
             except ftplib.error_perm:
-                    continue
+                continue
             fichs = []
             self.ftp.dir ( fichs.append )
             # Now, only consider the ones for the tile we want.
