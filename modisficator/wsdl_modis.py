@@ -17,8 +17,8 @@ def wsdl_get_data_tseries ( lon, lat, product, layer, \
     import pylab
     import time
 
-    WSDLFile = 'http://daac.ornl.gov/cgi-bin/MODIS/" + \
-                "GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl?WSDL'
+    WSDLFile = 'http://daac.ornl.gov/cgi-bin/MODIS/' + \
+                'GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl?WSDL'
 
     while True:
         try:
@@ -111,9 +111,9 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
                 time.strptime(tempo, "A%Y%j")[2]))
             
             
-    WSDLFile = 'http://daac.ornl.gov/cgi-bin/MODIS/" +\
-                "GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl?WSDL'
-    client = Client( WSDLFile, cache=None )
+    WSDLFile = "http://daac.ornl.gov/cgi-bin/MODIS/" + \
+                "GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl?WSDL"
+    client = Client( WSDLFile )
     #For some reason, I can't cache...
     #while True:
         #try:
