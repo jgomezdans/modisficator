@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("./../")
-from modisficator.modis_db import modis_db
+from modisficator.modis_db import pg_modis_db
 import glob
 import time
 
-db = modis_db ( db_location="/home/ucfajlg/Data/scratch/modis_db.sqlite" )
-try:
-    db.create_db()
-except:
-    pass
+db = pg_modis_db ( )
+#try:
+    #db.create_db()
+#except:
+    #pass
 files = glob.glob ("/data/geospatial_11/ucfajlg/MODIS/mod09/*.hdf")
 files = files + glob.glob ("/scratch/ucfajlg/Mexico/TERRA/MOD09GA/h09v07/*.hdf")
 files.sort()

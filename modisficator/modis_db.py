@@ -39,11 +39,11 @@ class modis_db:
         
         sql_code = '''CREATE TABLE modis_data
                 (platform TEXT,
-                product TEXT, tile TEXT, date TEXT,
+                product TEXT, tile TEXT, date date,
                 data_file TEXT, browse_file TEXT,
                 metadata_file TEXT,PRIMARY KEY (product, tile, date ))'''
         c.execute ( sql_code )
-        self.db_conn.commit()
+        #self.db_conn.commit()
         c.close()
 
     def insert_record ( self, platform, product, tile, date, \
@@ -67,8 +67,8 @@ class modis_db:
                             browse_file, metadata_file )
         c.execute ( sql_code )
         
-        self.db_conn.commit()
-        c.close()
+        #self.db_conn.commit()
+        #c.close()
         
     def find_start_date ( self, product ):
         """
@@ -123,7 +123,7 @@ class modis_db:
         if timestamp == None:
             if date_start != None:
                 if iand:
-                    sql_code += "AND date>=='%s' " % date_start
+                    sql_code += "AND date>='%s' " % date_start
                 else:
                     sql_code += "WHERE date>='%s' "% date_start
                     iand = True
