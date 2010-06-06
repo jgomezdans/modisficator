@@ -163,7 +163,7 @@ class pg_modis_db ( modis_db ):
         :parameter db_location: The location of the sqlite database
         """
         dbname = "modis_vault"
-        dsn = "dbname='%s' user='%s' host='%s' password='%s' port='5433'" \
+        dsn = "dbname='%s' user='%s' host='%s' password='%s'" \
             % ( dbname, user, host, password )
         self.connect_to_db (dsn )
 
