@@ -57,7 +57,7 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
             if len( resp ) == 0:
                 # No product, need to download it
                 curr_ftp_dir = ftp_dir + "/%s"% \
-                            (curr_date.strftime( "%Y.%m.%d" )
+                            (curr_date.strftime( "%Y.%m.%d" ) )
                 # Do the FTPing
                 output_files = net_modis.download_product ( \
                                 curr_ftp_dir, curr_date )
