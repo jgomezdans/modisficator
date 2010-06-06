@@ -70,7 +70,7 @@ class modis_db:
             c.execute ( sql_code )
         except psycopg2.IntegrityError:
             print sql_code
-        #self.db_conn.commit()
+        self.db_conn.commit()
         c.close()
         
     def find_start_date ( self, product ):

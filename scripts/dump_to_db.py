@@ -24,7 +24,15 @@ for fich in files:
     if fich.find(".xml")<0:
         fname = fich.split("/")[-1].split(".")
         tile = fname[2]
+        product = fname[0]
+        if product.find("MOD")>=0:
+            platform="TERRA"
+        elif product.find("MYD")>=0:
+            platform="AQUA"
+        elif product.find("MCD")>=0:
+            platform="COMBINED"
+        print fname, product, platform
         timestamp = time.strftime( "%Y-%m-%d", \
                     time.strptime( fname[1], "A%Y%j" ))
-        db.insert_record ( "TERRA", "MOD09GA", tile, timestamp, \
+        db.insert_record ( "TERRA", product, tile, timestamp, \
                 fich, "NONE", fich+".xml" )
