@@ -75,7 +75,7 @@ class modis_db:
         Find the starting date of data in the MODIS FTP server
         """
         c = self.db_conn.cursor()
-        sql_code = "SELECT start_date, periodicity FROM modis_ftp_vault WHERE product=%s;" % \
+        sql_code = "SELECT start_date, periodicity FROM modis_ftp_vault WHERE product='%s.005';" % \
                     product
         c.execute ( sql_code )
         result = c.fetchall()
@@ -87,7 +87,7 @@ class modis_db:
         """
         c = self.db_conn.cursor()
         sql_code = "SELECT product_dir, platform FROM modis_ftp_vault" + \
-                " WHERE product=%s.%s;" % ( product, "005")
+                " WHERE product='%s.%s';" % ( product, "005")
         c.execute ( sql_code )
         result = c.fetchall()
         return result[0]
@@ -149,7 +149,7 @@ class modis_db:
         return result
 
 class pg_modis_db ( modis_db ):
-    import psycopg2
+    
     """
     The modis_db class stores the MODIS products and is able to search
     them. POSTGRESQL version
@@ -171,6 +171,7 @@ class pg_modis_db ( modis_db ):
         """
         A method to connect to the database. Should test for exceptions?
         """
+        import psycopg2
         try:
             self.db_conn = psycopg2.connect( dsn )
         except:
