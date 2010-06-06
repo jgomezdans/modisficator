@@ -77,7 +77,7 @@ class modis_db:
         c = self.db_conn.cursor()
         sql_code = "SELECT start_date, periodicity FROM modis_ftp_vault WHERE product=%s;" % \
                     product
-        results c.execute ( sql_code )
+        c.execute ( sql_code )
         result = c.fetchall()
         return result
         
