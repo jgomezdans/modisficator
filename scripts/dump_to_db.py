@@ -13,6 +13,12 @@ db = pg_modis_db ( )
     #pass
 files = glob.glob ("/data/geospatial_11/ucfajlg/MODIS/mod09/*.hdf")
 files = files + glob.glob ("/scratch/ucfajlg/Mexico/TERRA/MOD09GA/h09v07/*.hdf")
+files = files + glob.glob ("/data/geospatial_10/ucfajlg/MCD45_SAfrica/*.hdf")
+files = files + glob.glob ("/data/geospatial_10/ucfajlg/MCD43A4_SAfrica/*.hdf")
+files = files + glob.glob ("/data/geospatial_10/ucfajlg/MCD15A2_SAfrica/*.hdf")
+files = files + glob.glob ("/data/geospatial_10/ucfajlg/MCD43A1/*.hdf")
+files = files + glob.glob ("/data/geospatial_10/ucfajlg/MOD12/*.hdf")
+
 files.sort()
 for fich in files:
     if fich.find(".xml")<0:

@@ -60,15 +60,18 @@ class modis_db:
         :parameter browse_file: Full path to JPG brose image.
         :parameter metadata_file: Full path to XML metadata file.
         """
+        import psycopg2
         c = self.db_conn.cursor()
         sql_code = """INSERT INTO modis_data values ( '%s','%s','%s', \
                      '%s','%s','%s','%s')""" % ( platform, product, \
                             tile, date,  data_file, \
                             browse_file, metadata_file )
-        c.execute ( sql_code )
-        
+        try:
+            c.execute ( sql_code )
+        except psycopg2.IntegrityError:
+            print sql_code
         #self.db_conn.commit()
-        #c.close()
+        c.close()
         
     def find_start_date ( self, product ):
         """
