@@ -149,6 +149,7 @@ class modis_db:
         return result
 
 class pg_modis_db ( modis_db ):
+    import psycopg2
     """
     The modis_db class stores the MODIS products and is able to search
     them. POSTGRESQL version
@@ -162,8 +163,8 @@ class pg_modis_db ( modis_db ):
         :parameter db_location: The location of the sqlite database
         """
         dbname = "modis_vault"
-        dsn = "dbname='%s' user='%s' host='%s' password='%s' port='5433'"\
-            %(dbname, user, host, password)
+        dsn = "dbname='%s' user='%s' host='%s' password='%s' port='5433'" \
+            % ( dbname, user, host, password )
         self.connect_to_db (dsn )
 
         def connect_to_db ( self, dsn ):
