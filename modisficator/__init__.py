@@ -32,7 +32,7 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     if end_date is None:
         end_date = start_date
     # Instantiate classess
-    db = pg_modis_db (db_location="/home/ucfajlg/Data/scratch/modis_db.sqlite")
+    db = pg_modis_db ()
     net_modis = downloader( tile )
     # Calculate the interval of dates that are needed
     # Returns start and end date, and MODIS product periodicity
