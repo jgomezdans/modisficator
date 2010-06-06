@@ -75,12 +75,24 @@ class modis_db:
         Find the starting date of data in the MODIS FTP server
         """
         c = self.db_conn.cursor()
-        sql_code = "SELECT start_date, periodicity FROM modis_vault WHERE product=%s;" % \
+        sql_code = "SELECT start_date, periodicity FROM modis_ftp_vault WHERE product=%s;" % \
                     product
         results c.execute ( sql_code )
         result = c.fetchall()
         return result
+        
+    def get_ftp_dir ( self, product ):
+        """
+        Get the location of the product in NASA's FTP server from DB
+        """
+        c = self.db_conn.cursor()
+        sql_code = "SELECT product_dir, platform FROM modis_ftp_vault" + \
+                " WHERE product=%s.%s;" % ( product, "005")
+        c.execute ( sql_code )
+        result = c.fetchall()
+        return result[0]
 
+        
     def find_data ( self, product=None, tile=None, \
                           date_start=None, date_end=None, timestamp=None ):
         """
