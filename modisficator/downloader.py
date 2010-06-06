@@ -6,7 +6,7 @@
 import ftplib
 import time
 import os
-
+import logging 
 class InvalidPlatform(Exception):
     def __init__(self, value):
         self.value = value
@@ -41,9 +41,12 @@ class downloader:
         self.collection = collection
         self.tile = tile
         self.output_dir = output_dir
+        self.log = logging.getLogger( 'modisficator' )
+
         
     def __del__ ( self ):
         #close FtP connection and be nice.
+        self.log.info ( "Shutting down and closing down FTP session" )
         self.ftp.close()
             
     def get_list ( self, product_name, start_date, platform, end_date=None ):
