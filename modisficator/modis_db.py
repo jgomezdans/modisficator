@@ -167,13 +167,13 @@ class pg_modis_db ( modis_db ):
             % ( dbname, user, host, password )
         self.connect_to_db (dsn )
 
-        def connect_to_db ( self, dsn ):
-            """
-            A method to connect to the database. Should test for exceptions?
-            """
-            try:
-                self.db_conn = psycopg2.connect( dsn )
-            except:
-                print "Can't connect to database. Sorry!"
+    def connect_to_db ( self, dsn ):
+        """
+        A method to connect to the database. Should test for exceptions?
+        """
+        try:
+            self.db_conn = psycopg2.connect( dsn )
+        except:
+            print "Can't connect to database. Sorry!"
 
 
