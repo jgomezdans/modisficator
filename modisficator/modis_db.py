@@ -69,6 +69,17 @@ class modis_db:
         
         self.db_conn.commit()
         c.close()
+        
+    def find_start_date ( self, product ):
+        """
+        Find the starting date of data in the MODIS FTP server
+        """
+        c = self.db_conn.cursor()
+        sql_code = "SELECT start_date, periodicity FROM modis_vault WHERE product=%s;" % \
+                    product
+        results c.execute ( sql_code )
+        result = c.fetchall()
+        return result
 
     def find_data ( self, product=None, tile=None, \
                           date_start=None, date_end=None, timestamp=None ):
@@ -124,4 +135,32 @@ class modis_db:
         c.execute (sql_code )
         result = c.fetchall()
         return result
+
+class pg_modis_db ( modis_db ):
+    """
+    The modis_db class stores the MODIS products and is able to search
+    them. POSTGRESQL version
+    """
+    def __init__ ( self, user="fire", host="oleiros.geog.ucl.ac.uk", \
+                    password="fire" ):
+        """
+        The creator. Usually requires a loction for the db, which could
+        be made unique per user (eg ~/Data/modis_db.sqlte or something)
+        
+        :parameter db_location: The location of the sqlite database
+        """
+        dbname = "modis_vault"
+        dsn = "dbname='%s' user='%s' host='%s' password='%s' port='5433'"\
+            %(dbname, user, host, password)
+        self.connect_to_db (dsn )
+
+        def connect_to_db ( self, dsn ):
+            """
+            A method to connect to the database. Should test for exceptions?
+            """
+            try:
+                self.db_conn = psycopg2.connect( dsn )
+            except:
+                print "Can't connect to database. Sorry!"
+
 
