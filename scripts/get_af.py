@@ -88,10 +88,10 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
 
 
 def main ( tile, start_date, end_date ):
-    from modisficator import get_modis_product
+    from modisficator import get_modis_data
     import pdb
-    for retval in get_modis_product( tile, "MOD14A1", \
-                start_date, "TERRA", end_date=end_date):
+    for retval in get_modis_data( tile, "MOD14A1", \
+                start_date, end_date=end_date):
         # Apparently, GDAL doesn't do unicode
         hdf_file = (retval[1]).encode( 'ascii' )
         

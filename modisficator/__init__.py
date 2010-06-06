@@ -6,7 +6,7 @@ from modis_db import *
 from downloader import *
 
 
-def __get_interval ( start_date, end_date, product ):
+def __get_interval ( start_date, end_date, product, db ):
     import datetime
     start_modis_data, product_period = db.find_start_date ( product )
     start_date = datetime.datetime.strptime ( start_date, "%Y-%m-%d" )
@@ -32,12 +32,12 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     if end_date is None:
         end_date = start_date
     # Instantiate classess
-    db = modis_db (db_location="/home/ucfajlg/Data/scratch/modis_db.sqlite")
+    db = pg_modis_db (db_location="/home/ucfajlg/Data/scratch/modis_db.sqlite")
     net_modis = downloader( tile )
     # Calculate the interval of dates that are needed
     # Returns start and end date, and MODIS product periodicity
     (start_grab, end_grab, periodicity ) = __get_interval \
-                            ( start_date, end_date, product )
+                            ( start_date, end_date, product, db )
     #Set current date to start of leech period.
     curr_date = start_grab
     #Get the remote location and platform name in case we
