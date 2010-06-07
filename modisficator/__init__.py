@@ -4,7 +4,7 @@
 
 from modis_db import *
 from downloader import *
-
+import pdb
 
 def __get_interval ( start_date, end_date, product, db ):
     import datetime
@@ -12,18 +12,25 @@ def __get_interval ( start_date, end_date, product, db ):
     start_date = datetime.datetime.strptime ( start_date, "%Y-%m-%d" )
     end_date = datetime.datetime.strptime ( end_date, "%Y-%m-%d" )
     periodicity = datetime.timedelta ( days = product_period )
-    
+    t0 = datetime.timedelta(days=0)
     time_cursor = datetime.datetime.strptime ( start_modis_data, "%Y-%m-%d" )
+   
     while True:
-        print time_cursor
-        if ( start_date - time_cursor ) <= periodicity:
+        
+        if t0 <= ( start_date - time_cursor ) <= periodicity:
             start_grab = time_cursor
         elif (time_cursor>=start_date) and \
                 (( time_cursor ) >= ( end_date + periodicity )):
             end_grab = time_cursor
             break
-        time_cursor = time_cursor + periodicity
-
+            
+        if time_cursor.year == (time_cursor + periodicity).year:
+            time_cursor = time_cursor + periodicity
+        else:
+            anho = (time_cursor + periodicity).year
+            time_cursor = datetime.datetime.strptime ( "%d-01-01"%anho,\
+                "%Y-%m-%d")
+    print start_grab, end_grab
     return ( start_grab, end_grab, periodicity )
 
 def get_modis_data ( tile, product, start_date, end_date=None ):
@@ -44,7 +51,10 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     curr_date = start_grab
     #Get the remote location and platform name in case we
     #need to download data not yet present in the Db
-    platform, ftp_dir = db.get_ftp_dir ( product )
+    ftp_dir, platform = db.get_ftp_dir ( product )
+    net_modis.platform = platform
+    net_modis.product = product
+    net_modis.tile = tile
     # Iterator loop
     while True:
         # If the date is equal to the end date, break out of the loop
@@ -52,17 +62,16 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
             return
         else:
             #check whether curr_date is in DB
-            resp = db.find_data ( self, product=product, \
+            tstamp = curr_date.strftime("%Y-%m-%d")
+            resp = db.find_data ( product=product, \
                                 tile=tile, timestamp=tstamp )
             #Depending on the lenght of resp, we either have the data
             # or not
             if len( resp ) == 0:
                 # No product, need to download it
-                curr_ftp_dir = ftp_dir + "/%s"% \
-                            (curr_date.strftime( "%Y.%m.%d" ) )
                 # Do the FTPing
                 output_files = net_modis.download_product ( \
-                                curr_ftp_dir, curr_date )
+                    ftp_dir, curr_date.strftime( "%Y.%m.%d" ) )
                 #Downloaded files need to be sorted out
                 for fich in output_files:
                     if (fich.find("JPG")>=0) or (fich.find("jpg")>=0):

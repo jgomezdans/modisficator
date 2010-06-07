@@ -193,9 +193,10 @@ class downloader:
         """
         This is the method that does the downloading of a prdouct
         """
-
-        out_dir = os.path.join ( self.output_dir, self.platform, self.product, \
+        import pdb
+        out_dir = os.path.join ( self.output_dir,self.platform, self.product, \
                                 self.tile )
+        pdb.set_trace()
         if not os.path.exists ( out_dir ):
             os.makedirs ( out_dir )
         output_files = []
@@ -209,6 +210,7 @@ class downloader:
         self.ftp.dir ( fichs.append )
         # Now, only consider the ones for the tile we want.
         grab0 = [ f for f in fichs if f.find( self.tile ) >= 0 ]
+        print grab0
         for grab_file in grab0:
             fname = grab_file.split()[7]
             f_out = open( os.path.join ( out_dir, fname), 'w')
