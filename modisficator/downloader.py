@@ -95,7 +95,7 @@ class downloader:
                             product_name, self.collection ))
         except ftplib.error_perm:
             raise InvalidProduct, "This product doesn't seem to exist?"
-        except NameError:
+        except AttributeError:
             # Not connected to the ftp server
             self.__ftp_connect ()
             self.ftp.cwd ("/%s/%s.%s/" % ( platform_dir[platform], \
@@ -172,7 +172,7 @@ class downloader:
                 self.ftp.cwd ( "%s/%s"%(ftp_dir, fecha) )
             except ftplib.error_perm:
                 continue
-            except NameError:
+            except AttributeError:
                 # Not connected to the ftp server
                 self.__ftp_connect ()
                 self.ftp.cwd ( "%s/%s"%(ftp_dir, fecha) )
@@ -217,7 +217,7 @@ class downloader:
             self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
         except ftplib.error_perm:
             raise ValueError, "Can't change dir to %s/%s"%(ftp_dir, get_date)
-        except NameError:
+        except AttributeError:
             # Not connected to the ftp server
             self.__ftp_connect ()
             self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
