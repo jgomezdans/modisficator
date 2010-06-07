@@ -16,7 +16,7 @@ def __get_interval ( start_date, end_date, product, db ):
     time_cursor = datetime.datetime.strptime ( start_modis_data, "%Y-%m-%d" )
     while True:
         print time_cursor
-        if ( time_cursor + periodicity ) == start_date:
+        if ( start_date - time_cursor ) <= periodicity:
             start_grab = time_cursor
         elif (time_cursor>=start_date) and \
                 (( time_cursor ) >= ( end_date + periodicity )):
