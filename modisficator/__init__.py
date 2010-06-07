@@ -8,16 +8,18 @@ from downloader import *
 
 def __get_interval ( start_date, end_date, product, db ):
     import datetime
-    start_modis_data, product_period = db.find_start_date ( product )
+    start_modis_data, product_period = db.find_start_date ( product )[0]
     start_date = datetime.datetime.strptime ( start_date, "%Y-%m-%d" )
     end_date = datetime.datetime.strptime ( end_date, "%Y-%m-%d" )
     periodicity = datetime.timedelta ( days = product_period )
     
     time_cursor = datetime.datetime.strptime ( start_modis_data, "%Y-%m-%d" )
     while True:
+        print time_cursor
         if ( time_cursor + periodicity ) == start_date:
             start_grab = time_cursor
-        elif ( time_cursor ) == ( end_date + periodicity ):
+        elif (time_cursor>=start_date) and \
+                (( time_cursor ) >= ( end_date + periodicity )):
             end_grab = time_cursor
             break
         time_cursor = time_cursor + periodicity

@@ -105,4 +105,4 @@ def main ( tile, start_date, end_date ):
 
         
 if __name__ == "__main__":
-    main( "h19v10", "2004.08.01", "2004.08.25" )
+    main( "h19v10", "2004-08-01", "2004-08-25" )
