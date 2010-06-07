@@ -6,6 +6,7 @@
 import ftplib
 import time
 import os
+import logging
 
 class InvalidPlatform(Exception):
     def __init__(self, value):
@@ -21,7 +22,7 @@ class InvalidProduct(Exception):
     def __str__(self):
         return repr (self.value)
 
-
+log = logging.getLogger('main-log')
 
 class downloader:
     """
@@ -33,27 +34,29 @@ class downloader:
         For some reason, I put something about the collection there, which is not
         yeat in the database.
         """
-        
+
         self.ftp_host = "e4ftl01u.ecs.nasa.gov"
-#        self.ftp = ftplib.FTP ( self.ftp_host )
-        #self.ftp.set_debuglevel(2)
-        #self.ftp.set_pasv( True )
- #       self.ftp.login()
         self.collection = collection
         self.tile = tile
         self.output_dir = os.path.join ( output_dir, os.environ['USER'], "MODIS" )
         if not os.path.exists ( self.output_dir ):
+            log.info ( "Making output dir in %s" % self.output_dir )
             os.mkdir ( self.output_dir )
         
 
     def __ftp_connect ( self ):
-        self.ftp = ftplib.FTP ( self.ftp_host )
-        self.ftp.login ( )
+        log.info ( "Connecting to remote FTP server..." )
+        try:
+            self.ftp = ftplib.FTP ( self.ftp_host )
+            self.ftp.login ( )
+        except:
+            log.exception ( "Cannot connect to FTP host %s" % self.ftp_host )
     def __del__ ( self ):
         #close FtP connection and be nice.
-        self.log.info ( "Shutting down and closing down FTP session" )
+        
         try:
             self.ftp.close()
+            log.info ( "Shutting down and closing down FTP session" )
         except AttributeError:
             pass
             
@@ -64,13 +67,10 @@ class downloader:
         self.platform = platform
         self.product = product_name
 
-        #try:
+        log.info ( "Getting list of available products on remote server" )
         (ftp_dir, get_dates ) = self.__navigate_ftp ( \
                             product_name, start_date, platform, \
                             end_date=end_date )
-        #except:
-            
-        #    raise ValueError, "Some error occurred in __navigate_ftp!"
         return ( ftp_dir, get_dates )
         
     def __navigate_ftp ( self, product_name, start_date, platform, \
@@ -159,7 +159,8 @@ class downloader:
         """
 
         # First, navigate FTP tree and get products
-    
+        log.info ( "Start downloading products %s(%s) from %s to %s" % \
+            ( product_name, platform, start_date, end_date ) )
         ( ftp_dir, get_dates ) = self.__navigate_ftp ( \
                             product_name, start_date, platform, \
                             end_date=end_date )
@@ -199,18 +200,20 @@ class downloader:
                 def handle_download(block):
                     f_out.write(block)
                     f_out.flush()
-
+                log.info ( "Starting download of %s" % fname )
+                log.info (  "\tSaving to %s" % os.path.join ( out_dir, fname) )
                 self.ftp.retrbinary('RETR ' + fname, handle_download )
 
                 f_out.close()
-
+                log.info ( "\tDone!" )
         return output_files
 
     def download_product ( self, ftp_dir, get_date):
         """
         This is the method that does the downloading of a prdouct
         """
-        
+        log.info ( "Downloading product %s(%s) for tile %s, %s" % ( self.product, \
+            self.platform, self.tile, get_date ) )
         out_dir = os.path.join ( self.output_dir,self.platform, self.product, \
                                 self.tile )
         
@@ -245,9 +248,10 @@ class downloader:
             def handle_download(block):
                 f_out.write(block)
                 f_out.flush()
-
+            log.info ( "Starting download of %s" % fname )
+            log.info ( "\tSaving to %s" % os.path.join ( out_dir, fname) )
             self.ftp.retrbinary('RETR ' + fname, handle_download )
 
             f_out.close()
-
+            log.info ( "\tDone!" )
         return output_files

@@ -7,6 +7,9 @@ a sqlite database that stores MODIS products that have been downloaded,
  product type) are available.
 """
 import sqlite3
+import logging
+
+log = logging.getLogger ( 'main-log' )
 
 class modis_db:
     """
@@ -23,6 +26,16 @@ class modis_db:
         """
         self.db_file = db_location
         self.connect_to_db ()
+
+    def __del__ ( self ):
+        """
+        Destructor method. Perform a vaccum analyze!
+        """
+        sql_code = "VACUUM;"
+        log.info ("Vacuuming DB...")
+        c = self.db_conn.cursor()
+        c.execute ( sql_code )
+        c.close()
         
 
     def connect_to_db ( self ):
@@ -36,7 +49,7 @@ class modis_db:
         If the database doesn't exist, create it.
         """
         c = self.db_conn.cursor()
-        
+        log.info ("Creating table modis_data")
         sql_code = '''CREATE TABLE modis_data
                 (platform TEXT,
                 product TEXT, tile TEXT, date date,
@@ -66,17 +79,19 @@ class modis_db:
                      '%s','%s','%s','%s')""" % ( platform, product, \
                             tile, date,  data_file, \
                             browse_file, metadata_file )
+        log.info ( "Inserting record %s" % sql_code )
         try:
             c.execute ( sql_code )
         except psycopg2.IntegrityError:
-            print sql_code
-        self.db_conn.commit()
+            log.exception ( "Can't instert record!")
         c.close()
         
     def find_start_date ( self, product ):
         """
         Find the starting date of data in the MODIS FTP server
         """
+        log.info ( "Finding first date of data on MODIS FTP server " + \
+            "for product %s" % product )
         c = self.db_conn.cursor()
         sql_code = "SELECT start_date, periodicity FROM modis_ftp_vault WHERE product='%s.005';" % \
                     product
@@ -88,6 +103,8 @@ class modis_db:
         """
         Get the location of the product in NASA's FTP server from DB
         """
+        log.info ( "Finding dir on MODIS FTP server " + \
+        "for product %s" % product )
         c = self.db_conn.cursor()
         sql_code = "SELECT product_dir, platform FROM modis_ftp_vault" + \
                 " WHERE product='%s.%s';" % ( product, "005")
@@ -163,7 +180,7 @@ class pg_modis_db ( modis_db ):
         """
         The creator. Usually requires a loction for the db, which could
         be made unique per user (eg ~/Data/modis_db.sqlte or something)
-        
+
         :parameter db_location: The location of the sqlite database
         """
         dbname = "modis_vault"
@@ -176,9 +193,16 @@ class pg_modis_db ( modis_db ):
         A method to connect to the database. Should test for exceptions?
         """
         import psycopg2
+        log.info ( "Connected to DB in oleiros" )
         try:
             self.db_conn = psycopg2.connect( dsn )
         except:
-            print "Can't connect to database. Sorry!"
+            log.exception ( "Can't connect to database. Sorry!" )
 
-
+    def __del__ ( self ):
+        old_isolation_level = self.db_conn.isolation_level
+        self.db_conn.set_isolation_level(0)
+        query = "VACUUM FULL"
+        c = self.db_conn.cursor( query )
+        self.db_conn.set_isolation_level( old_isolation_level )
+        
