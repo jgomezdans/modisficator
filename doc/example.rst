@@ -18,3 +18,5 @@ The first two steps can be accomplished with the following script (the data have
 
 .. plot:: ./plot_af.py
    :include-source:
+
+Now, for each fire and date located in the HDF file, we need to 
