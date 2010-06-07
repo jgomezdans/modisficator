@@ -6,7 +6,7 @@
 import ftplib
 import time
 import os
-import logging 
+
 class InvalidPlatform(Exception):
     def __init__(self, value):
         self.value = value
@@ -42,7 +42,9 @@ class downloader:
         self.collection = collection
         self.tile = tile
         self.output_dir = os.path.join ( output_dir, os.environ['USER'], "MODIS" )
-        self.log = logging.getLogger( 'modisficator' )
+        if not os.path.exists ( self.output_dir ):
+            os.mkdir ( self.output_dir )
+        
 
     def __ftp_connect ( self ):
         self.ftp = ftplib.FTP ( self.ftp_host )
