@@ -4,9 +4,7 @@ import pylab
 import numpy
 """
 def get_active_fires ( fname, fire_thresh=8 ):
-    """
-    Get active fires from MOD14A1.005 dataset. Returns a list of longitudes, latitudes, and day of fire
-    """
+
     from osgeo import gdal
     from osgeo import osr
     import datetime
