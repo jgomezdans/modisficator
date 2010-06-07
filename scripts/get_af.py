@@ -130,6 +130,8 @@ def main ( tile, start_date, end_date ):
     from modisficator import get_modis_data
     import pylab
     import datetime
+    import cPickle
+    f = open("test/sample.pkl", 'w')
     for retval in get_modis_data( tile, "MOD14A1", \
                 start_date, end_date=end_date):
         # Apparently, GDAL doesn't do unicode
@@ -141,10 +143,12 @@ def main ( tile, start_date, end_date ):
                         detection[1],  dates )
                 #pdb.set_trace()
                 do_tseries_plots ( D, dates)
+                cPickle.dump ( (D, dates), f )
+                
                 break
             break
         break
-
+        f.close()
         
 if __name__ == "__main__":
     main( "h19v10", "2004-08-25", "2004-09-05" )
