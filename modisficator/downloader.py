@@ -34,16 +34,18 @@ class downloader:
         yeat in the database.
         """
         self.ftp_host = "e4ftl01u.ecs.nasa.gov"
-        self.ftp = ftplib.FTP ( self.ftp_host )
+#        self.ftp = ftplib.FTP ( self.ftp_host )
         #self.ftp.set_debuglevel(2)
         #self.ftp.set_pasv( True )
-        self.ftp.login()
+ #       self.ftp.login()
         self.collection = collection
         self.tile = tile
         self.output_dir = output_dir
         self.log = logging.getLogger( 'modisficator' )
 
-        
+    def __ftp_connect ( self ):
+        self.ftp = ftplib.FTP ( self.ftp_host )
+        self.ftp.login ( )
     def __del__ ( self ):
         #close FtP connection and be nice.
         self.log.info ( "Shutting down and closing down FTP session" )
@@ -93,6 +95,11 @@ class downloader:
                             product_name, self.collection ))
         except ftplib.error_perm:
             raise InvalidProduct, "This product doesn't seem to exist?"
+        except NameError:
+            # Not connected to the ftp server
+            self.__ftp_connect ()
+            self.ftp.cwd ("/%s/%s.%s/" % ( platform_dir[platform], \
+                product_name, self.collection ))
         ftp_dir = "/%s/%s.%s/" % ( platform_dir[platform], \
                                 product_name, self.collection )
         # Now, get all the available dates (they are subdirs, so need
@@ -165,6 +172,10 @@ class downloader:
                 self.ftp.cwd ( "%s/%s"%(ftp_dir, fecha) )
             except ftplib.error_perm:
                 continue
+            except NameError:
+                # Not connected to the ftp server
+                self.__ftp_connect ()
+                self.ftp.cwd ( "%s/%s"%(ftp_dir, fecha) )
             fichs = []
             self.ftp.dir ( fichs.append )
             # Now, only consider the ones for the tile we want.
@@ -206,6 +217,10 @@ class downloader:
             self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
         except ftplib.error_perm:
             raise ValueError, "Can't change dir to %s/%s"%(ftp_dir, get_date)
+        except NameError:
+            # Not connected to the ftp server
+            self.__ftp_connect ()
+            self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
         fichs = []
         self.ftp.dir ( fichs.append )
         # Now, only consider the ones for the tile we want.
