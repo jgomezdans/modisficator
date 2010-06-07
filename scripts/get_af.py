@@ -86,10 +86,50 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
     return_dict[ 'dates' ] = dates
     return return_dict
 
+def do_tseries_plots ( chunk, af_date ):
+    import datetime
+    import pylab
+    import numpy
+    import pdb
+    
+    af_date = pylab.datestr2num ( datetime.datetime.strptime(af_date, \
+                "A%Y%j").strftime("%Y-%m-%d") )
+    dates_mcd43 = pylab.datestr2num([ \
+        datetime.datetime.strptime(d, \
+        "A%Y%j").strftime("%Y-%m-%d") \
+        for d in chunk['dates'] ])
+    pylab.subplot(211)
+    rho_nir = chunk['Nadir_Reflectance_Band2']
+    rho_qa = chunk ['BRDF_Albedo_Quality']
+    rho_nir = numpy.where ( rho_qa <= 1, rho_nir, numpy.nan )
+    rho_nir[rho_nir>1] = numpy.nan
+    pdb.set_trace()
+    [ pylab.plot_date ( dates_mcd43, \
+        rho_nir[:, i], '-s', label="Pix %d" % (i+1) ) \
+        for i in xrange(9) ]
+    #pylab.axvline ( af_date )
+    pylab.legend(loc='best')
+    pylab.ylabel(r'NIR NBAR reflectance [-]')
+    pylab.xlabel(r'Date' )
+    pylab.grid(True)
+    pylab.subplot(212)
+    rho_swir = chunk['Nadir_Reflectance_Band5']
+    rho_swir = numpy.where ( rho_qa <= 1, rho_swir, numpy.nan )
+    rho_swir[rho_swir>1] = numpy.nan
+    [ pylab.plot_date ( dates_mcd43, \
+        rho_swir[:, i], '-s', label="Pix %d" % (i+1) ) \
+        for i in xrange(9) ]
+    pylab.legend(loc='best')
+    #pylab.axvline ( af_date )
+    pylab.ylabel(r'SWIR NBAR reflectance [-]')
+    pylab.xlabel(r'Date' )
+    pylab.grid(True)
+    
 
 def main ( tile, start_date, end_date ):
     from modisficator import get_modis_data
-    import pdb
+    import pylab
+    import datetime
     for retval in get_modis_data( tile, "MOD14A1", \
                 start_date, end_date=end_date):
         # Apparently, GDAL doesn't do unicode
@@ -99,9 +139,12 @@ def main ( tile, start_date, end_date ):
             for detection in afires[dates]:
                 D = get_nbar_rho ( detection[0], \
                         detection[1],  dates )
-                pdb.set_trace()
-                print D
+                #pdb.set_trace()
+                do_tseries_plots ( D, dates)
+                break
+            break
+        break
 
         
 if __name__ == "__main__":
-    main( "h17v04", "2006-07-25", "2006-08-25" )
+    main( "h19v10", "2004-08-25", "2004-09-05" )
