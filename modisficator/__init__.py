@@ -14,7 +14,7 @@ def __get_interval ( start_date, end_date, product, db ):
     periodicity = datetime.timedelta ( days = product_period )
     t0 = datetime.timedelta(days=0)
     time_cursor = datetime.datetime.strptime ( start_modis_data, "%Y-%m-%d" )
-   
+    pdb.set_trace()
     while True:
         
         if t0 <= ( start_date - time_cursor ) <= periodicity:
@@ -23,7 +23,6 @@ def __get_interval ( start_date, end_date, product, db ):
                 (( time_cursor ) >= ( end_date + periodicity )):
             end_grab = time_cursor
             break
-            
         if time_cursor.year == (time_cursor + periodicity).year:
             time_cursor = time_cursor + periodicity
         else:
@@ -82,11 +81,11 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                         data_file = fich
                 # Store the newly downloaded product in DB
                 db.insert_record ( platform, product, tile, \
-                    date.replace(".", "-"), \
+                    curr_date.strftime( "%Y-%m-%d" ), \
                     data_file, browse_file, metadata_file )
                 #"return" files
                 curr_date = curr_date + periodicity
-                yield ( date, data_file, browse_file, metadata_file )
+                yield ( curr_date, data_file, browse_file, metadata_file )
             else:
                 curr_date = curr_date + periodicity
                 yield ( resp[0] )
