@@ -12,11 +12,23 @@ Contents:
    :maxdepth: 2
 
    modisficator.rst
+   example.rst
+   
+Module documentation
+====================
 
-Indices and tables
-==================
+.. automodule:: modisficator
+    :members:
+    
+.. automodule:: modisficator.wsdl_modis
+    :members:
+        
+.. autoclass:: modisficator.downloader
+    :members:
+        
+.. autoclass:: modisficator.pg_modis_db
+    :members:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+
 

@@ -49,7 +49,19 @@ def __get_interval ( start_date, end_date, product, db ):
 
 def get_modis_data ( tile, product, start_date, end_date=None ):
     """
-    An iterator to return MODIS HDF datasets by tile, product and dates.
+    An iterator to return MODIS HDF datasets by tile, product and dates. In each iteration, the function returns a dictionary with the following elements:
+
+    1. A date in datetime format (you can convert it to anything you want with ``ret_date.strftime("%Y-%m-%d")``)
+    2. The location of the HDF file (full path). You can then open it with GDAL, but remember to convert it to ASCII first (otherwise, GDAL complains): ``retval[1]).encode( 'ascii' )``
+    3. A quicklook 'BROWSE' file (or NONE, if none present).
+    4. An XML metadata file.
+
+    If the data is not available in the system, this function will go away and fetch it. The data will be downloaded to ``/data/geospatial_12/users/$USERNAME/MODIS``, and a logs directory is stored there to see how things are going.
+
+    :parameter tile: The MODIS tile, usually something like "h19v10" or "h09v07". This is case dependent.
+    :parameter product: Product abbreviated name, something like "MOD09GA", "MCD15A2". Again, case sensitive.
+    :parameter start_date: Requested start date, in the format "YYYY-MM-DD".
+    :parameter end_date: Requested end date, in the format "YYYY-MM-DD". If not set, only the start date is considered
     """
     # If no end_date specified, single date is assumed.
     log.info ( "Starting iterator!" )
