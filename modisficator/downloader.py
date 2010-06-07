@@ -27,12 +27,13 @@ class downloader:
     """
     A downloader class
     """
-    def __init__ ( self, tile, output_dir="/scratch/ucfajlg/Mexico/", \
+    def __init__ ( self, tile, output_dir="/data/geospatial_12/users/", \
                     collection="005" ):
         """
         For some reason, I put something about the collection there, which is not
         yeat in the database.
         """
+        
         self.ftp_host = "e4ftl01u.ecs.nasa.gov"
 #        self.ftp = ftplib.FTP ( self.ftp_host )
         #self.ftp.set_debuglevel(2)
@@ -40,7 +41,7 @@ class downloader:
  #       self.ftp.login()
         self.collection = collection
         self.tile = tile
-        self.output_dir = output_dir
+        self.output_dir = os.path.join ( output_dir, os.environ['USER'], "MODIS" )
         self.log = logging.getLogger( 'modisficator' )
 
     def __ftp_connect ( self ):
@@ -49,7 +50,10 @@ class downloader:
     def __del__ ( self ):
         #close FtP connection and be nice.
         self.log.info ( "Shutting down and closing down FTP session" )
-        self.ftp.close()
+        try:
+            self.ftp.close()
+        except AttributeError:
+            pass
             
     def get_list ( self, product_name, start_date, platform, end_date=None ):
         """
