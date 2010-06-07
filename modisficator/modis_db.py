@@ -112,7 +112,8 @@ class modis_db:
         :parameter timestamp: Fish one particular date ONLY
         """
         c = self.db_conn.cursor()
-        sql_code = """SELECT * FROM modis_data """
+        sql_code = "SELECT date, data_file, browse_file, metadata_file "+ \
+                      "FROM modis_data "
         iand = False
         if product != None:
             sql_code += "WHERE product='%s' " % product

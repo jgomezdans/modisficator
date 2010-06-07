@@ -93,15 +93,17 @@ def main ( tile, start_date, end_date ):
     for retval in get_modis_data( tile, "MOD14A1", \
                 start_date, end_date=end_date):
         # Apparently, GDAL doesn't do unicode
-        hdf_file = (retval[1]).encode( 'ascii' )
+        print retval
         
-        afires = get_active_fires ( hdf_file )
-        for dates in afires.iterkeys():
-            for detection in afires[dates][100:]:
-                D = get_nbar_rho ( detection[0], \
-                        detection[1],  dates )
-                pdb.set_trace()
-                print D
+        #hdf_file = (retval[1]).encode( 'ascii' )
+        
+        #afires = get_active_fires ( hdf_file )
+        #for dates in afires.iterkeys():
+            #for detection in afires[dates][100:]:
+                #D = get_nbar_rho ( detection[0], \
+                        #detection[1],  dates )
+                #pdb.set_trace()
+                #print D
 
         
 if __name__ == "__main__":

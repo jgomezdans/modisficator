@@ -4,7 +4,6 @@
 
 from modis_db import *
 from downloader import *
-import pdb
 
 def __get_interval ( start_date, end_date, product, db ):
     import datetime
@@ -14,7 +13,7 @@ def __get_interval ( start_date, end_date, product, db ):
     periodicity = datetime.timedelta ( days = product_period )
     t0 = datetime.timedelta(days=0)
     time_cursor = datetime.datetime.strptime ( start_modis_data, "%Y-%m-%d" )
-    pdb.set_trace()
+    
     while True:
         
         if t0 <= ( start_date - time_cursor ) <= periodicity:
@@ -29,7 +28,7 @@ def __get_interval ( start_date, end_date, product, db ):
             anho = (time_cursor + periodicity).year
             time_cursor = datetime.datetime.strptime ( "%d-01-01"%anho,\
                 "%Y-%m-%d")
-    print start_grab, end_grab
+    #print start_grab, end_grab
     return ( start_grab, end_grab, periodicity )
 
 def get_modis_data ( tile, product, start_date, end_date=None ):
