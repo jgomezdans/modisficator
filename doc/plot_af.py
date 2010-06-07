@@ -52,10 +52,12 @@ def get_active_fires ( fname, fire_thresh=8 ):
 """
             
 
+queimas = numpy.loadtxt (   "../test/MOD14A1.A2003137.h09v07.005.2007319180038_LonLat.txt", \
+    delimiter=";", usecols=(2,3))
 
-queimas = numpy.loadtxt (   "/scratch/ucfajlg/Mexico/TERRA/MOD14A1/h19v10/" + \
-                      "MOD14A1.A2004233.h19v10.005.2007308012744_LonLat.txt", \
-                      delimiter=";", usecols=(2,3))
+#queimas = numpy.loadtxt (   "/scratch/ucfajlg/Mexico/TERRA/MOD14A1/h19v10/" + \
+                      #"MOD14A1.A2004233.h19v10.005.2007308012744_LonLat.txt", \
+                      #delimiter=";", usecols=(2,3))
 
 projection_opts={'projection':'cyl','resolution':'c'}
 m = Basemap(  urcrnrlon=queimas[:,0].max() + 0.5, \
