@@ -84,6 +84,7 @@ class modis_db:
             c.execute ( sql_code )
         except psycopg2.IntegrityError:
             log.exception ( "Can't instert record!")
+        self.db_conn.commit()
         c.close()
         
     def find_start_date ( self, product ):
