@@ -251,7 +251,9 @@ def main ( tile, start_date, end_date ):
     
     if not os.path.exists(os.path.expanduser("~/Data/AF_inversions")):
         # Directory doesn't exist. Create it.
-        os.makedir ( os.path.expanduser("~/Data/AF_inversions") )
+        os.mkdir ( os.path.expanduser("~/Data/AF_inversions") )
+        print "Making dir %s" % os.path.expanduser("~/Data/AF_inversions")
+        print "Stuff will be saved there"
     fname = os.path.expanduser("~/Data/AF_inversions") + \
             "/%s_%s_%s.dat" % ( tile, start_date, end_date)
     
