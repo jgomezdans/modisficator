@@ -43,7 +43,7 @@ def wsdl_get_data_tseries ( lon, lat, product, layer, \
             ret = client.service.getsubset (lat, lon, product, layer, \
                     "A%4d%03d"%(year, day_start),"A%4d%03d"%(year, day_end), \
                     x_pixels, y_pixels)
-
+            #print ret
             for time_step in xrange(len(ret.subset.item)):
                 # Process time to get pylab-friendly time axis.
                 tempo = ret.subset.item[time_step].strip().split(",")[2]
@@ -132,7 +132,7 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
             x_pixels, y_pixels)
     except:
         raise ValueError, "Something wrong with your request. Time window?"
-
+    #print ret
     for time_step in xrange(len(ret.subset)):
         # Process time to get pylab-friendly time axis.
         tempo = ret.subset[time_step].strip().split(",")[2]
