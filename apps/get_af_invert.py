@@ -1,12 +1,46 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Stuff about getting things from the web
+SYNOPSIS
+
+get_af_invert.py [-h,--help] [-v,--verbose] [--version]
+
+DESCRIPTION
+
+This script downloads the MODIS TERRA active fire product (MOD14A1)
+for a given tile and temporal period, locates the active fires, and
+outputs them to a text file indicating the date, longitude and
+latitude. Each of these samples is then used to query the MODIS webservice
+to download a time series of NBAR reflectances (+ associated QA flags). The
+dates closest to the fire (pre- and post) are selected on terms of QA flags, and
+used to invert a fire model. The results of this inversion are stored, and so
+is the pre- and post-fire reflectance data.
+
+EXAMPLES
+
+get_af_invert.py --tile h19v10 --start 2004-05-01 --end 2004-09-31
+
+
+AUTHOR
+
+Jose Gomez-Dans <j.gomez-dans@geog.ucl.ac.uk>
+
+LICENSE
+
+This script is in the public domain, free from copyrights or restrictions.
+
+VERSION
+
+1.0
 """
 import sys
 sys.path.append("/home/ucfajlg/Data/python/modisficator")
 
 from modisficator import wsdl_modis, fire_inverter
+import sys
+import os
+import traceback
+import optparse
 
 CONTADOR = 0
 
@@ -82,7 +116,7 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
     product = "MCD43A4"
     for nlayer in xrange(1, 8):
         layer = "Nadir_Reflectance_Band%d" % nlayer
-        print layer
+        
         ( dates, datas ) = wsdl_modis.wsdl_get_snapshot( lon, lat, \
                 product, layer, year, \
                 day_start, day_end, x_pixels, y_pixels )
@@ -91,6 +125,9 @@ def get_nbar_rho ( lon, lat, date, t_window = 42 ):
     return return_dict
 
 def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
+    """
+    Do plots of NBAR reflectance before and after the event.
+    """
     import datetime
     import numpy
     import pdb
@@ -185,11 +222,14 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
                 store_file )
 
 def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
+    """
+    Saves inversion results to a file, plus pre- and post-fire reflectance.
+    """
     global CONTADOR
     global TILE
     global FECHA
     CONTADOR += 1
-    fname = "/data/geospatial_10/ucfajlg/SAFire_validation/" + \
+    fname = "~/Data/" + \
                 "AF_inversions/%s_%s_%05d.txt"% ( TILE, FECHA, CONTADOR )
     fp = open ( fname, 'w' )
     fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
@@ -202,11 +242,14 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     return fname
 
 def main ( tile, start_date, end_date ):
+    """
+    Main function
+    """
     from modisficator import get_modis_data
     import pylab
     import datetime
     
-    fname = "/data/geospatial_10/ucfajlg/SAFire_validation/" + \
+    fname = "~/Data/" + \
             "AF_inversions/%s_%s_%s.dat" % ( tile, start_date, end_date)
     f = open( fname, 'w')
     MAX_NUM_FIRES_TILE = 50
@@ -242,14 +285,46 @@ def main ( tile, start_date, end_date ):
         f.close()
         
 if __name__ == "__main__":
-    for htile in xrange (19, 22):
-        for vtile in xrange (9, 12):
-            tile = "h%02dv%02d" % ( htile, vtile )
-            print "Doing tile: ", tile
-            sys.stdout.flush()
-            for (start, end) in [ ("2004-05-25", "2004-06-05"),\
-                                  ("2004-07-25", "2004-08-05"), \
-                                  ("2004-08-25", "2004-09-05")]:
-                print "Doing period: %s-%s" % ( start, end )
-                sys.stdout.flush()
-                main( tile, start, end  )
+
+    try:
+        parser = optparse.OptionParser(formatter = \
+            optparse.TitledHelpFormatter(), usage=globals()['__doc__'], \
+            version='1.0')
+        parser.add_option ( '-t', '--tile', action="store", dest="tile", \
+                               help="Specify the tile (h19v10, for example)" )
+        parser.add_option ( '-s', '--start', action="store", \
+            dest="start_date", help="Start date in "+ \
+                                "YYYY-MM-DD format." )
+        parser.add_option( "-e", '--end', action="store", dest="end_date", \
+                            help="End date in YYYY-MM-DD format" )
+
+        if len(sys.argv) < 2:
+            print "No options specified"
+            print "Hence I'm doing southern Africa"
+            
+            for htile in xrange (19, 22):
+                for vtile in xrange (9, 12):
+                    tile = "h%02dv%02d" % ( htile, vtile )
+                    print "Doing tile: ", tile
+                    sys.stdout.flush()
+                    for (start, end) in [ ("2004-05-25", "2004-06-05"),\
+                            ("2004-07-25", "2004-08-05"), \
+                            ("2004-08-25", "2004-09-05")]:
+                        print "Doing period: %s-%s" % ( start, end )
+                        sys.stdout.flush()
+                        main( tile, start, end  )
+                    
+
+        (options, args) = parser.parse_args()
+        main( options.tile, options.start_date, options.end_date )
+
+    except KeyboardInterrupt, e: # Ctrl-C
+        raise e
+    except SystemExit, e: # sys.exit()
+        raise e
+    except Exception, e:
+        print 'ERROR, UNEXPECTED EXCEPTION'
+        print str(e)
+        traceback.print_exc()
+        os._exit(1)
+            
