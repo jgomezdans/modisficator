@@ -79,6 +79,7 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
     """
     from suds.client import Client
     import numpy
+    from time import sleep
 
     if date_format == "MODIS":
         def parse_date ( tempo ):
@@ -132,33 +133,41 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
             x_pixels, y_pixels)
     except:
         raise ValueError, "Something wrong with your request. Time window?"
-    #print ret
-    for time_step in xrange(len(ret.subset)):
-        # Process time to get pylab-friendly time axis.
-        tempo = ret.subset[time_step].strip().split(",")[2]
-        tempo_out.append ( tempo )
+    # The followin construct is needed because the retrieve sometimes fails
+    # silently. in these cases, we trap the exception and wait for 20s before
+    # trying again. The error seems to be related to server overloads
+    while True:
+        try:
+            for time_step in xrange(len(ret.subset)):
+                # Process time to get pylab-friendly time axis.
+                tempo = ret.subset[time_step].strip().split(",")[2]
+                tempo_out.append ( tempo )
 
-        date.append( parse_date ( tempo ) )
-        
-        if ret.scale == 0.:
-            try:
-                vals = numpy.array ( [int(f) for f in \
-                    ret.subset[time_step].strip().split(",")[5:]])
-            except ValueError:
-                response = ret.subset[time_step].split("\n")[0]
-                vals = numpy.array ( [int(f) for f in \
-                    response.strip().split(",")[5:]])
-            value.append ( vals)
-        else:
-            try:
-                vals = numpy.array ( [float(f) for f in \
-                        ret.subset[time_step].strip().split(",")[5:]])
-            except ValueError:
-                response = ret.subset[time_step].split("\n")[0]
-                vals = numpy.array ( [int(f) for f in \
-                        response.strip().split(",")[5:]])
-            value.append( vals*ret.scale)
+                date.append( parse_date ( tempo ) )
 
+                if ret.scale == 0.:
+                    try:
+                        vals = numpy.array ( [int(f) for f in \
+                            ret.subset[time_step].strip().split(",")[5:]])
+                    except ValueError:
+                        response = ret.subset[time_step].split("\n")[0]
+                        vals = numpy.array ( [int(f) for f in \
+                            response.strip().split(",")[5:]])
+                    value.append ( vals)
+                else:
+                    try:
+                        vals = numpy.array ( [float(f) for f in \
+                                ret.subset[time_step].strip().split(",")[5:]])
+                    except ValueError:
+                        response = ret.subset[time_step].split("\n")[0]
+                        vals = numpy.array ( [int(f) for f in \
+                                response.strip().split(",")[5:]])
+                    value.append( vals*ret.scale)
+                # Break the while loop and continue
+                break
+        except: #Weird response. wait for 20 s and try again
+            sleep ( 20 )
+            continue
 
     date = numpy.array ( date )
     value = numpy.array ( value )
