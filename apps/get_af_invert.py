@@ -229,8 +229,8 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     global TILE
     global FECHA
     CONTADOR += 1
-    fname = "~/Data/" + \
-                "AF_inversions/%s_%s_%05d.txt"% ( TILE, FECHA, CONTADOR )
+    fname = os.path.expanduser("~/Data/AF_inversions") + \
+                "/AF_inversions/%s_%s_%05d.txt"% ( TILE, FECHA, CONTADOR )
     fp = open ( fname, 'w' )
     fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
     i = 0
@@ -249,8 +249,12 @@ def main ( tile, start_date, end_date ):
     import pylab
     import datetime
     
-    fname = "~/Data/" + \
-            "AF_inversions/%s_%s_%s.dat" % ( tile, start_date, end_date)
+    if not os.path.exists(os.path.expanduser("~/Data/AF_inversions")):
+        # Directory doesn't exist. Create it.
+        os.makedir ( os.path.expanduser("~/Data/AF_inversions") )
+    fname = os.path.expanduser("~/Data/AF_inversions") + \
+            "/%s_%s_%s.dat" % ( tile, start_date, end_date)
+    
     f = open( fname, 'w')
     MAX_NUM_FIRES_TILE = 50
     global TILE
