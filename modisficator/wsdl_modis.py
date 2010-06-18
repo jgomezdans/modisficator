@@ -163,10 +163,11 @@ def wsdl_get_snapshot( lon, lat, product, layer, year, \
                         vals = numpy.array ( [int(f) for f in \
                                 response.strip().split(",")[5:]])
                     value.append( vals*ret.scale)
-                # Break the while loop and continue
-                break
+            # Break the while loop and continue
+            break
         except: #Weird response. wait for 20 s and try again
             sleep ( 20 )
+            print ret
             continue
 
     date = numpy.array ( date )

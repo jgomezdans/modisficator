@@ -52,6 +52,7 @@ def get_active_fires ( fname, fire_thresh=8 ):
     from osgeo import osr
     import datetime
     import numpy
+    import pdb
 
     fnameout = fname.replace(".hdf", "_LonLat.txt")
     fout = open ( fnameout, 'w' )
@@ -258,7 +259,7 @@ def main ( tile, start_date, end_date ):
             "/%s_%s_%s.dat" % ( tile, start_date, end_date)
     
     f = open( fname, 'w')
-    MAX_NUM_FIRES_TILE = 50
+    MAX_NUM_FIRES_TILE = 100
     global TILE
     global FECHA
     TILE = tile
@@ -267,9 +268,11 @@ def main ( tile, start_date, end_date ):
         # Apparently, GDAL doesn't do unicode
         hdf_file = (retval[1]).encode( 'ascii' )
         print "Doing file", hdf_file
+        sys.stdout.flush()
         afires = get_active_fires ( hdf_file )
         for dates in afires.iterkeys():
             print "Doing date", dates
+            sys.stdout.flush()
             num_fires = 0
             for detection in afires[dates]:
                 D = get_nbar_rho ( detection[0], \
