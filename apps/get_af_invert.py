@@ -266,8 +266,10 @@ def main ( tile, start_date, end_date ):
                 start_date, end_date=end_date):
         # Apparently, GDAL doesn't do unicode
         hdf_file = (retval[1]).encode( 'ascii' )
+        print "Doing file", hdf_file
         afires = get_active_fires ( hdf_file )
         for dates in afires.iterkeys():
+            print "Doing date", dates
             num_fires = 0
             for detection in afires[dates]:
                 D = get_nbar_rho ( detection[0], \

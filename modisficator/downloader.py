@@ -40,8 +40,15 @@ class downloader:
         self.tile = tile
         self.output_dir = os.path.join ( output_dir, os.environ['USER'], "MODIS" )
         if not os.path.exists ( self.output_dir ):
-            log.info ( "Making output dir in %s" % self.output_dir )
-            os.mkdir ( self.output_dir )
+            try:
+                log.info ( "Making output dir in %s" % self.output_dir )
+                os.mkdir ( self.output_dir )
+            except IOError:
+                log.info ( "Can't write to %s" % self.output_dir )
+                log.info ( "Will attempt /home/%s/Data/MODIS/" % \
+                            os.environ ['USER']  )
+                self.output_dir = "/home/%s/Data/MODIS/" % os.environ['USER']
+                os.makedirs ( self.output_dir )
         
 
     def __ftp_connect ( self ):
