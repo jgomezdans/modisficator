@@ -230,7 +230,7 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     global TILE
     global FECHA
     CONTADOR += 1
-    fname = os.path.expanduser("~/Data/AF_inversions") + \
+    fname = os.path.expanduser("~/Data") + \
                 "/AF_inversions/%s_%s_%05d.txt"% ( TILE, FECHA, CONTADOR )
     fp = open ( fname, 'w' )
     fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
@@ -293,7 +293,7 @@ def main ( tile, start_date, end_date ):
                     break
             
         
-        f.close()
+    f.close()
         
 if __name__ == "__main__":
 
