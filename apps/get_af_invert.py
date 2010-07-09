@@ -84,8 +84,8 @@ def get_active_fires ( fname, fire_thresh=8 ):
             sample_xy = numpy.array ( sample_xy )
             lonlat = transform.TransformPoints  ( sample_xy )
             lonlat = numpy.array(lonlat)[ :, :2 ]
-            txt_out = ''.join ( ["%s ; %s ; %f ; %f\n"%( current_date_pretty, \
-                    current_date, lonlat[i, 0], lonlat[i, 1]) \
+            txt_out = ''.join ( ["%s ; %s ; %f ; %f ; %d ; %d\n"%( current_date_pretty, \
+                    current_date, lonlat[i, 0], lonlat[i, 1], x, y) \
                     for i in xrange( num_fires ) ] )
             return_struct [ current_date ] = lonlat
             fout.write ( txt_out )
@@ -212,6 +212,7 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
     for pxl in xrange( num_pixels ):
         
         if (fcc_arr[ pxl ] > fcc_max) :
+                fcc_max = fcc_arr [ pxl ]
                 winner = pxl
     if winner == -1:
         return None # No suitable fires returned
@@ -239,6 +240,7 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     else:
         os.makedirs (  os.path.expanduser("~/Data") + \
                 "/AF_inversions/%s/%s/" % ( TILE, FECHA ) )
+        fp = open ( fname, 'w' )
     fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
     i = 0
     
