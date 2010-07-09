@@ -231,8 +231,14 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     global FECHA
     CONTADOR += 1
     fname = os.path.expanduser("~/Data") + \
-                "/AF_inversions/%s_%s_%05d.txt"% ( TILE, FECHA, CONTADOR )
-    fp = open ( fname, 'w' )
+                "/AF_inversions/%s/%s/%s_%s_%05d.txt"% ( TILE, FECHA, \
+                        TILE, FECHA, CONTADOR )
+    if os.path.exists ( os.path.expanduser("~/Data") + \
+                "/AF_inversions/%s/%s/" % ( TILE, FECHA ) ):
+        fp = open ( fname, 'w' )
+    else:
+        os.makedirs (  os.path.expanduser("~/Data") + \
+                "/AF_inversions/%s/%s/" % ( TILE, FECHA ) )
     fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
     i = 0
     
