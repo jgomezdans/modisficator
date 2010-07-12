@@ -100,6 +100,8 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                 output_files = net_modis.download_product ( \
                     ftp_dir, curr_date.strftime( "%Y.%m.%d" ) )
                 #Downloaded files need to be sorted out
+                browse_file = "N/A"
+                metadata_file = "N/A"
                 for fich in output_files:
                     if (fich.find("JPG")>=0) or (fich.find("jpg")>=0):
                         browse_file = fich

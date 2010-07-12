@@ -38,6 +38,7 @@ sys.path.append("/home/ucfajlg/Data/python/modisficator")
 
 from modisficator import wsdl_modis, fire_inverter
 import sys
+import pdb
 import os
 import traceback
 import optparse
@@ -52,7 +53,7 @@ def get_active_fires ( fname, fire_thresh=8 ):
     from osgeo import osr
     import datetime
     import numpy
-    import pdb
+    
 
     fnameout = fname.replace(".hdf", "_LonLat.txt")
     fout = open ( fnameout, 'w' )
@@ -76,6 +77,7 @@ def get_active_fires ( fname, fire_thresh=8 ):
                     datetime.timedelta(days = day)).strftime("%Y.%m.%d")
         ( y, x ) = numpy.nonzero ( fires[day, :, :] >= fire_thresh )
         num_fires = x.shape[0]
+
         if num_fires > 0:
             sample_xy = [ gdal.ApplyGeoTransform ( geo_transform, \
                     float( x[i] ), \
@@ -85,7 +87,7 @@ def get_active_fires ( fname, fire_thresh=8 ):
             lonlat = transform.TransformPoints  ( sample_xy )
             lonlat = numpy.array(lonlat)[ :, :2 ]
             txt_out = ''.join ( ["%s ; %s ; %f ; %f ; %d ; %d\n"%( current_date_pretty, \
-                    current_date, lonlat[i, 0], lonlat[i, 1], x, y) \
+                    current_date, lonlat[i, 0], lonlat[i, 1], x[i], y[i]) \
                     for i in xrange( num_fires ) ] )
             return_struct [ current_date ] = lonlat
             fout.write ( txt_out )
@@ -183,6 +185,8 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
     a0_arr = numpy.zeros ( num_pixels )
     a1_arr = numpy.zeros ( num_pixels )
     a2_arr = numpy.zeros ( num_pixels )
+    pre_tsample = -1
+    post_tsample = -1
     for pxl in xrange ( num_pixels ):
         for band in xrange (0, 7):
             for tsample in xrange ( pre_sel.shape[0] ):
@@ -190,6 +194,7 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
                 if  pre_sel[tsample] and \
                     (numpy.isfinite ( rho[ band, tsample, pxl ] )):
                     rho_pre[ pxl, band] = rho[ band, tsample, pxl ]
+                    pre_tsample = tsample
 
             #pdb.set_trace()
             for tsample in xrange ( post_sel.shape[0]-1, -1, -1 ):
@@ -197,6 +202,7 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
                 if (post_sel[tsample]) and \
                             numpy.isfinite ( rho[ band, tsample, pxl ] ):
                     rho_post[ pxl, band] = rho[ band, tsample, pxl ]
+                    post_tsample = tsample
 
  
         ( fcc, a0, a1, a2, sBurn, sFWD, rmse,fccUnc, a0Unc, a1Unc, a2Unc ) = \
@@ -220,6 +226,9 @@ def do_tseries_plots ( chunk, af_date, num_pixels=9 ):
         store_file = save_inversion ( fcc_arr[pxl], a0_arr[pxl], a1_arr[pxl], \
             a2_arr[pxl], \
             rho_pre[pxl, :], rho_post[pxl, :], wavelengths )
+        save_chunk (  fcc_arr[pxl], a0_arr[pxl], a1_arr[pxl], \
+            a2_arr[pxl], rho, wavelengths, \
+            pxl, af_date, dates_mcd43, pre_tsample, post_tsample )
         return ( fcc_arr[pxl], a0_arr[pxl], a1_arr[pxl], a2_arr[pxl], \
                 store_file )
 
@@ -230,7 +239,7 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     global CONTADOR
     global TILE
     global FECHA
-    CONTADOR += 1
+    #CONTADOR += 1
     fname = os.path.expanduser("~/Data") + \
                 "/AF_inversions/%s/%s/%s_%s_%05d.txt"% ( TILE, FECHA, \
                         TILE, FECHA, CONTADOR )
@@ -247,6 +256,47 @@ def save_inversion ( fcc, a0, a1, a2, rho_pre, rho_post, wv ):
     for (i, w) in enumerate( wv ):
         fp.write ( "%f ; %f ; %f \n" % ( w, rho_pre[i], rho_post[i] ) )
         i =+ 1
+    fp.close()
+    return fname
+
+def save_chunk ( fcc, a0, a1, a2, rho,  wv, \
+                pxl, af_date, mcd43_dates, pre_sample, post_sample ):
+    """
+    Saves inversion results to a file, plus pre- and post-fire reflectance.
+    """
+    import pylab
+    global CONTADOR
+    global TILE
+    global FECHA
+    CONTADOR += 1
+    #pdb.set_trace()
+    fname = os.path.expanduser("~/Data") + \
+                "/AF_inversions/%s/%s/chunk_%s_%s_%05d.txt"% ( TILE, FECHA, \
+                        TILE, FECHA, CONTADOR )
+    if os.path.exists ( os.path.expanduser("~/Data") + \
+                "/AF_inversions/%s/%s/" % ( TILE, FECHA ) ):
+        fp = open ( fname, 'w' )
+    else:
+        os.makedirs (  os.path.expanduser("~/Data") + \
+                "/AF_inversions/%s/%s/" % ( TILE, FECHA ) )
+        fp = open ( fname, 'w' )
+    fp.write("# AF date: %s. Pre-Date: %s. Post-Date: %s\n" % \
+      ( pylab.num2date(af_date).strftime("%Y/%m/%d"), \
+       pylab.num2date(mcd43_dates[pre_sample]).strftime("%Y/%m/%d"), \
+       pylab.num2date(mcd43_dates[post_sample]).strftime("%Y/%m/%d")) )
+    fp.write("# Pixel#: %d\n" % pxl )
+    fp.write ("# fcc: %f, a0: %f, a1: %f, a2: %f\n"%(fcc, a0, a1, a2) )
+    i = 0
+    fp.write("Wavelen ")
+    for (j, date) in enumerate ( mcd43_dates ):
+        fp.write ('; "%s" ' % ( pylab.num2date ( date).strftime("%Y/%m/%d")))
+    fp.write("\n")
+    for (i, w) in enumerate( wv ):
+        fp.write ("%8.2f  " % ( w ) )
+        for (j, date) in enumerate ( mcd43_dates ):
+            fp.write ( " ;%f " % ( rho[i, j,  pxl] ) )
+        i =+ 1
+        fp.write("\n")
     fp.close()
     return fname
 
@@ -341,9 +391,9 @@ if __name__ == "__main__":
         raise e
     except SystemExit, e: # sys.exit()
         raise e
-    except Exception, e:
-        print 'ERROR, UNEXPECTED EXCEPTION'
-        print str(e)
-        traceback.print_exc()
-        os._exit(1)
+    #except Exception, e:
+        #print 'ERROR, UNEXPECTED EXCEPTION'
+        #print str(e)
+        #traceback.print_exc()
+        ##os._exit(1)
             
