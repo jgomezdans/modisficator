@@ -9,6 +9,7 @@ from StringIO import StringIO
 import sys
 import os
 import datetime
+import pdb
 
 # Set up logging
 logging.basicConfig ( \
@@ -97,12 +98,15 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
             if len( resp ) == 0:
                 # No product, need to download it
                 # Do the FTPing
+                log.info ("File not present, needs downloading")
+                #pdb.set_trace()
                 output_files = net_modis.download_product ( \
                     ftp_dir, curr_date.strftime( "%Y.%m.%d" ) )
                 #Downloaded files need to be sorted out
                 browse_file = "N/A"
                 metadata_file = "N/A"
                 for fich in output_files:
+                    print fich
                     if (fich.find("JPG")>=0) or (fich.find("jpg")>=0):
                         browse_file = fich
                     elif fich.find(".xml")>=0:
@@ -110,10 +114,12 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                     else:
                         data_file = fich
                 # Store the newly downloaded product in DB
+                log.info ("Done with downloading")
                 db.insert_record ( platform, product, tile, \
                     curr_date.strftime( "%Y-%m-%d" ), \
                     data_file, browse_file, metadata_file )
                 #"return" files
+                log.info("Download registered into DB")
                 curr_date = curr_date + periodicity
                 yield ( curr_date, data_file, browse_file, metadata_file )
             else:

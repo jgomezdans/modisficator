@@ -55,6 +55,7 @@ class downloader:
         log.info ( "Connecting to remote FTP server..." )
         try:
             self.ftp = ftplib.FTP ( self.ftp_host )
+            #self.ftp.set_debuglevel(2)
             self.ftp.login ( )
         except:
             log.exception ( "Cannot connect to FTP host %s" % self.ftp_host )
