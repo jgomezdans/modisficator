@@ -65,6 +65,11 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     :parameter end_date: Requested end date, in the format "YYYY-MM-DD". If not set, only the start date is considered
     """
     # If no end_date specified, single date is assumed.
+
+    # this kludge is needed for monthly products
+    from dateutil.relativedelta import relativedelta
+    month_delta = relativedelta(months=+1)
+    
     log.info ( "Starting iterator!" )
     if end_date is None:
         end_date = start_date
@@ -83,8 +88,9 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     net_modis.platform = platform
     net_modis.product = product
     net_modis.tile = tile
-    if product == "MCD45A1": # Monthly product....
-        curr_date.replace(day=1)
+    if product.find("MCD45A1")>=0: # Monthly product....
+        curr_date = curr_date.replace(day=1)
+        print curr_date
     
     # Iterator loop
     while True:
@@ -126,16 +132,19 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                     data_file, browse_file, metadata_file )
                 #"return" files
                 log.info("Download registered into DB")
-                curr_date = curr_date + periodicity
-                if product=="MCD45A1":
-                    curr_date.replace( day=1 )
-                    
+                
+                if product.find("MCD45A1")>=0:
+                    curr_date = curr_date + month_delta
+                else:
+                    curr_date = curr_date + periodicity
                 yield ( curr_date, data_file, browse_file, metadata_file )
             else:
-                curr_date = curr_date + periodicity
-                if product=="MCD45A1":
-                    curr_date.replace( day=1 )
+                
+                if product.find("MCD45A1")>=0:
+                    curr_date = curr_date + month_delta
                     # Groan...
+                else:
+                    curr_date = curr_date + periodicity
                 yield ( resp[0] )
 
 ################def get_modis_product ( tile, product_name, start_date, platform, \
