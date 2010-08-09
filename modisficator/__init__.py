@@ -83,6 +83,9 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
     net_modis.platform = platform
     net_modis.product = product
     net_modis.tile = tile
+    if product == "MCD45A1": # Monthly product....
+        curr_date.replace(day=1)
+    
     # Iterator loop
     while True:
         # If the date is equal to the end date, break out of the loop
@@ -103,6 +106,9 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                 output_files = net_modis.download_product ( \
                     ftp_dir, curr_date.strftime( "%Y.%m.%d" ) )
                 #Downloaded files need to be sorted out
+                if output_files is None:
+                    # Some sort of problem with download. Yields a None
+                    yield None
                 browse_file = "N/A"
                 metadata_file = "N/A"
                 for fich in output_files:
@@ -121,9 +127,15 @@ def get_modis_data ( tile, product, start_date, end_date=None ):
                 #"return" files
                 log.info("Download registered into DB")
                 curr_date = curr_date + periodicity
+                if product=="MCD45A1":
+                    curr_date.replace( day=1 )
+                    
                 yield ( curr_date, data_file, browse_file, metadata_file )
             else:
                 curr_date = curr_date + periodicity
+                if product=="MCD45A1":
+                    curr_date.replace( day=1 )
+                    # Groan...
                 yield ( resp[0] )
 
 ################def get_modis_product ( tile, product_name, start_date, platform, \

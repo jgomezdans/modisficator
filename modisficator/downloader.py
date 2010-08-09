@@ -238,6 +238,12 @@ class downloader:
             # Not connected to the ftp server
             self.__ftp_connect ()
             self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
+        except ftplib.error_temp:
+            # Time out?
+            # Not connected to the ftp server
+            log.info("Reconnecting....")
+            self.__ftp_connect ()
+            self.ftp.cwd ( "%s/%s"%(ftp_dir, get_date) )
         fichs = []
         self.ftp.dir ( fichs.append )
         # Now, only consider the ones for the tile we want.
@@ -258,7 +264,11 @@ class downloader:
                 f_out.flush()
             log.info ( "Starting download of %s" % fname )
             log.info ( "\tSaving to %s" % os.path.join ( out_dir, fname) )
-            self.ftp.retrbinary('RETR ' + fname, handle_download )
+            try:
+                self.ftp.retrbinary('RETR ' + fname, handle_download )
+            except ftplib.error_perm:
+                # File doesn't exist. Return a None
+                return None
 
             f_out.close()
             log.info ( "\tDone!" )
